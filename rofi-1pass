@@ -3,15 +3,11 @@ set -e
 set -o pipefail
 
 print-account-list() {
-  lpass ls --format "%/as%ag - %an (%au) [%ai]" 2>&1
-}
-
-copy-account-field() {
-  lpass show --clip "--${2}" "$1" >/dev/null 2>/dev/null
+  op list items | jq -r '.[] | " - \(.overview.title) (\(.overview.ainfo)) [\(.uuid)]"'
 }
 
 open-account-url() {
-  local url=$(lpass show --url "$1")
+  local url=$(op get item "$1" | jq -r '.overview.url')
   if [[ -n $url ]]; then
     xdg-open "$url" >/dev/null 2>/dev/null
   else
@@ -34,7 +30,7 @@ show-account-options() {
   echo ">> Copy password [$id]"
   echo ">> Copy username [$id]"
 
-  url=$(lpass show --url "$id")
+  url=$(op get item "$id" | jq -r '.overview.url')
   if is-actual-url "$url"; then
     echo ">> Open $url [$id]"
     echo ">> Copy URL [$id]"
@@ -52,7 +48,7 @@ is-entry-selected() {
 }
 
 id-in-selection() {
-  echo "$1" | grep -oE '\[[0-9]+\]$' | tr -d '[]'
+  echo "$1" | grep -oE '\[[a-z0-9]+\]$' | tr -d '[]'
 }
 
 debug() {
@@ -67,13 +63,13 @@ if is-entry-selected "$1"; then
   if [[ -n $id ]]; then
     case "$selected" in
       '>> Copy password'*)
-        copy-account-field "$id" password ;;
+        op get item "$id" | jq -j '.details.fields[] | select(.designation == "password") | .value' | xclip -selection c >/dev/null 2>/dev/null ;;
       '>> Copy username'*)
-        copy-account-field "$id" username ;;
+        op get item "$id" | jq -j '.details.fields[] | select(.designation == "username") | .value' | xclip -selection c >/dev/null 2>/dev/null ;;
       '>> Copy URL'*)
-        copy-account-field "$id" url ;;
+        op get item "$id" | jq -j '.overview.url' | xclip -selection c >/dev/null 2>/dev/null ;;
       '>> Copy ID'*)
-        copy-account-field "$id" id ;;
+        op get item "$id" | jq -j '.uuid' | xclip -selection c > /dev/null 2>/dev/null ;;
       '>> Open'*)
         open-account-url "$id" ;;
       *)

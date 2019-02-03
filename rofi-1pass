@@ -2,6 +2,8 @@
 set -e
 set -o pipefail
 
+source ~/.op/session
+
 print-account-list() {
   op list items | jq -r '.[] | " - \(.overview.title) (\(.overview.ainfo)) [\(.uuid)]"'
 }

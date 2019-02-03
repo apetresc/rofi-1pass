@@ -20,6 +20,14 @@ support interactive signin).
 3. Symlink the script to somewhere on your `$PATH`: `ln -s $(pwd)/rofi-1pass ~/bin/rofi-1pass`.
 4. Run rofi with this as a custom script: `rofi -modi 1pass:rofi-1pass -show 1pass`.
 
+## Usage
+To use rofi-1pass with i3, or when executing via a keyboard shortcut that does not have access to your environment, you can do the following:
+1. Pipe the results of op signin $subdomain to ~/.op/session like so:
+```shell
+$ op signin my > ~/.op/session
+```
+2. Run rofi
+
 ## License
 
 Copyright © 2018 Adrian Petrescu. Code released under the MIT license.

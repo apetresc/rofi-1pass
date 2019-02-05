@@ -2,6 +2,17 @@
 set -e
 set -o pipefail
 
+
+login() {
+  if command -v pinentry-x11; then
+    echo $(pinentry-x11 << EOS | grep -oP 'D \K.*' | op signin my > ~/.op/session
+SETDESC Enter your 1password master password
+GETPIN
+EOS
+    )
+  fi
+}
+
 print-account-list() {
   op list items | jq -r '.[] | " - \(.overview.title) (\(.overview.ainfo)) [\(.uuid)]"'
 }
@@ -54,6 +65,12 @@ id-in-selection() {
 debug() {
   echo "$@" > /dev/stderr
 }
+
+if [[ -f ~/.op/session ]]; then
+  source ~/.op/session
+else
+  login
+fi
 
 if is-entry-selected "$1"; then
   selected="$1"

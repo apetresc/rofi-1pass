@@ -15,6 +15,10 @@ EOS
 
 print-account-list() {
   op list items | jq -r '.[] | " - \(.overview.title) (\(.overview.ainfo)) [\(.uuid)]"'
+  if [ ! $? -eq 0 ]; then
+    login
+    exit 0
+  fi
 }
 
 open-account-url() {

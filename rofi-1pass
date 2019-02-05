@@ -3,9 +3,11 @@ set -e
 set -o pipefail
 
 
+: "${PINENTRY_PROGRAM:=pinentry-x11}"
+
 login() {
-  if command -v pinentry-x11; then
-    echo $(pinentry-x11 << EOS | grep -oP 'D \K.*' | op signin my > ~/.op/session
+  if command -v $PINENTRY_PROGRAM; then
+    echo $(PINENTRY_PROGRAM << EOS | grep -oP 'D \K.*' | op signin my > ~/.op/session
 SETDESC Enter your 1password master password
 GETPIN
 EOS

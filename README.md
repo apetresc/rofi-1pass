@@ -31,6 +31,9 @@ Alternatively, you can put the output of `op signin` into `~/.op/session` where 
 automatically sourced.
 4. Run rofi with this as a custom script: `rofi -modi 1pass:rofi-1pass -show 1pass`.
 
+### Arch Linux
+
+On Arch, the AUR has a [rofi-1pass](https://aur.archlinux.org/packages/rofi-1pass/) PKGBUILD.
 ## License
 
 Copyright © 2018 Adrian Petrescu. Code released under the MIT license.

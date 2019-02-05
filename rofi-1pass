@@ -3,23 +3,25 @@ set -e
 set -o pipefail
 
 
-: "${PINENTRY_PROGRAM:=pinentry-gtk-2}"
+: "${PINENTRY_PROGRAM:=pinentry-x11}"
 
 login() {
-  if command -v $PINENTRY_PROGRAM; then
-    echo $(PINENTRY_PROGRAM << EOS | grep -oP 'D \K.*' | op signin my > ~/.op/session
-SETDESC Enter your 1password master password
+  if command -v $PINENTRY_PROGRAM > /dev/null; then
+    echo $($PINENTRY_PROGRAM << EOS | grep -oP 'D \K.*' | op signin my > ~/.op/session
+SETDESC Enter your 1password master password:
+SETPROMPT Master Password:
 GETPIN
 EOS
     )
   fi
+  source ~/.op/session
 }
 
 print-account-list() {
   op list items | jq -r '.[] | " - \(.overview.title) (\(.overview.ainfo)) [\(.uuid)]"'
   if [ ! $? -eq 0 ]; then
     login
-    exit 0
+    print-account-list
   fi
 }
 
@@ -72,11 +74,10 @@ debug() {
   echo "$@" > /dev/stderr
 }
 
-if [[ -f ~/.op/session ]]; then
-  source ~/.op/session
-else
+if [[ ! -f ~/.op/session ]]; then
   login
 fi
+source ~/.op/session
 
 if is-entry-selected "$1"; then
   selected="$1"

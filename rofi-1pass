@@ -3,7 +3,7 @@ set -e
 set -o pipefail
 
 
-: "${PINENTRY_PROGRAM:=pinentry-x11}"
+: "${PINENTRY_PROGRAM:=pinentry-gtk-2}"
 
 login() {
   if command -v $PINENTRY_PROGRAM; then

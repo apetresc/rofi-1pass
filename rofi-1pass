@@ -7,19 +7,27 @@ set -o pipefail
 
 login() {
   if command -v $PINENTRY_PROGRAM > /dev/null; then
-    echo $($PINENTRY_PROGRAM << EOS | grep -oP 'D \K.*' | op signin my > ~/.op/session
+    $PINENTRY_PROGRAM << EOS | grep -oP 'D \K.*' | op signin my > ~/.op/session
 SETDESC Enter your 1password master password:
 SETPROMPT Master Password:
 GETPIN
 EOS
-    )
   fi
   source ~/.op/session
 }
 
 print-account-list() {
+  set +e
   op list items | jq -r '.[] | " - \(.overview.title) (\(.overview.ainfo)) [\(.uuid)]"'
-  if [ ! $? -eq 0 ]; then
+  LOGGED_IN=${PIPESTATUS[0]}
+  set -e
+
+  if [ $LOGGED_IN -eq 127 ]; then
+    echo "1password CLI tool 'op' not found"
+    exit 2
+  fi
+
+  if [ ! $LOGGED_IN -eq 0 ]; then
     login
     print-account-list
   fi

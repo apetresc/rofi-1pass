@@ -8,6 +8,7 @@ wonderfully simple [rofi-lpass](https://github.com/Mange/rofi-lpass) by Magnus B
 * List all your entries
 * Copy password of an entry
 * Copy username / email of an entry
+* Generate 2FA OTP of an entry (if entry has 2FA set up)
 * Copy URL (if entry has an URL)
 * Open URL (if entry has an URL)
 * Interactive password prompt with configurable `PINENTRY_PROGRAM`

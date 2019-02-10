@@ -53,11 +53,16 @@ is-actual-url() {
 
 show-account-options() {
   local id="$1"
+  local entry=$(op get item "$id")
 
   echo ">> Copy password [$id]"
   echo ">> Copy username [$id]"
 
-  url=$(op get item "$id" | jq -r '.overview.url')
+  if [[ -n $(echo $entry | jq -r '.details.sections[] | select(.fields != null) | .fields[] | select(.v != null) | select(.v | contains("otpauth://"))') ]]; then
+    echo ">> Copy OTP [$id]"
+  fi
+
+  url=$(echo $entry | jq -r '.overview.url')
   if is-actual-url "$url"; then
     echo ">> Open $url [$id]"
     echo ">> Copy URL [$id]"
@@ -98,6 +103,8 @@ if is-entry-selected "$1"; then
         op get item "$id" | jq -j '.details.fields[] | select(.designation == "password") | .value' | xclip -selection c >/dev/null 2>/dev/null ;;
       '>> Copy username'*)
         op get item "$id" | jq -j '.details.fields[] | select(.designation == "username") | .value' | xclip -selection c >/dev/null 2>/dev/null ;;
+      '>> Copy OTP'*)
+        op get totp "$id" | xclip -selection c >/dev/null 2>/dev/null ;;
       '>> Copy URL'*)
         op get item "$id" | jq -j '.overview.url' | xclip -selection c >/dev/null 2>/dev/null ;;
       '>> Copy ID'*)

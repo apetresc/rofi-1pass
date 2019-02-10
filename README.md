@@ -13,6 +13,10 @@ wonderfully simple [rofi-lpass](https://github.com/Mange/rofi-lpass) by Magnus B
 * Open URL (if entry has an URL)
 * Interactive password prompt with configurable `PINENTRY_PROGRAM`
 
+## Non-Features
+
+* Creating or editing new entries through rofi
+
 ## Dependencies
 
 In order to support interactive login (where `rofi-1pass` will prompt you for your password if you

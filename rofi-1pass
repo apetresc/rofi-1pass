@@ -18,7 +18,7 @@ EOS
 
 print-account-list() {
   set +e
-  op list items | jq -r '.[] | " - \(.overview.title) (\(.overview.ainfo)) [\(.uuid)]"'
+  op item list --format json | jq -r '.[] | "\(.title) (\(.additional_information)) [\(.id)]"'
   LOGGED_IN=${PIPESTATUS[0]}
   set -e
 
@@ -34,7 +34,7 @@ print-account-list() {
 }
 
 open-account-url() {
-  local url=$(op get item "$1" | jq -r '.overview.url')
+  local url=$(op item get --format json "$1" | jq -r '.urls[] | select(.primary == true) | .href')
   if [[ -n $url ]]; then
     xdg-open "$url" >/dev/null 2>/dev/null
   else
@@ -53,16 +53,16 @@ is-actual-url() {
 
 show-account-options() {
   local id="$1"
-  local entry=$(op get item "$id")
+  local entry=$(op item get --format json "$id")
 
   echo ">> Copy password [$id]"
   echo ">> Copy username [$id]"
 
-  if [[ -n $(echo $entry | jq -r '.details.sections[] | select(.fields != null) | .fields[] | select(.v != null) | select(.v | contains("otpauth://"))') ]]; then
+  if [[ -n $(echo $entry | jq -r '.fields[] | select(.value != null) | select(.type == "OTP")') ]]; then
     echo ">> Copy OTP [$id]"
   fi
 
-  url=$(echo $entry | jq -r '.overview.url')
+  url=$(echo $entry | jq -r '.urls[] | select(.primary == true) | .href')
   if is-actual-url "$url"; then
     echo ">> Open $url [$id]"
     echo ">> Copy URL [$id]"
@@ -100,15 +100,15 @@ if is-entry-selected "$1"; then
   if [[ -n $id ]]; then
     case "$selected" in
       '>> Copy password'*)
-        op get item "$id" | jq -j '.details.fields[] | select(.designation == "password") | .value' | xclip -selection c >/dev/null 2>/dev/null ;;
+        op item get --format json "$id" | jq -r '.fields[] | select(.value != null) | select(.purpose == "PASSWORD") | .value' | xclip -selection c >/dev/null 2>/dev/null ;;
       '>> Copy username'*)
-        op get item "$id" | jq -j '.details.fields[] | select(.designation == "username") | .value' | xclip -selection c >/dev/null 2>/dev/null ;;
+        op item get --format json "$id" | jq -r '.fields[] | select(.value != null) | select(.purpose == "USERNAME") | .value' | xclip -selection c >/dev/null 2>/dev/null ;;
       '>> Copy OTP'*)
-        op get totp "$id" | xclip -selection c >/dev/null 2>/dev/null ;;
+        op item get --format json "$id" | jq -r '.fields[] | select(.value != null) | select(.type == "OTP") | .value' | xclip -selection c >/dev/null 2>/dev/null ;;
       '>> Copy URL'*)
-        op get item "$id" | jq -j '.overview.url' | xclip -selection c >/dev/null 2>/dev/null ;;
+        op item get --format json "$id" | jq -r '.urls[] | select(.primary == true) | .href' | xclip -selection c >/dev/null 2>/dev/null ;;
       '>> Copy ID'*)
-        op get item "$id" | jq -j '.uuid' | xclip -selection c > /dev/null 2>/dev/null ;;
+        op item get --format json "$id" | jq -j '.id' | xclip -selection c > /dev/null 2>/dev/null ;;
       '>> Open'*)
         open-account-url "$id" ;;
       *)
